@@ -6,7 +6,7 @@ public interface Network {
 
     public void invoke();
 
-    public void setInput();
+    public void setInput(double[] inputVector);
 
-    public void getOuput();
+    public double[] getOuput();
 }

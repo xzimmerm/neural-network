@@ -2,8 +2,8 @@ package interfaces;
 
 public interface ActivationFunction {
     
-    public float activation(float input);
+    public double activation(double input);
 
-    public float derivation(float input);
+    public double derivation(double input);
 
 }
