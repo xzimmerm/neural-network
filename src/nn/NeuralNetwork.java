@@ -2,7 +2,8 @@ package nn;
 import nn.interfaces.Network; 
 import nn.interfaces.ActivationFunction;
 import nn.utils.Matrix.Matrix;
-
+import nn.utils.ActivationFunctions.Identity;
+    ;
 public class NeuralNetwork implements Network {
     
     private double[][][] weights;
@@ -29,11 +30,15 @@ public class NeuralNetwork implements Network {
             activationFunctions = new ActivationFunction[numberOfLayers];
 
             outputs[currLayer] = new double[inputSize]; // allocate the input neurons
+            potentials[currLayer] = outputs[currLayer]; // just to have something there and be consistent
+            activationFunctions[currLayer] = new Identity(); // same as above
+            weights[0] =  null; // no weights for input layer 
             currLayer++;
 
         }
 
         public Builder addLayer(int numberOfNeurons, ActivationFunction activationFunction){
+
             if (currLayer >= numberOfLayers){
                 throw new IllegalStateException("Cannot add more layers than specified");
             }
