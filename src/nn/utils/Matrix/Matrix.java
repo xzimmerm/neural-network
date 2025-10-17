@@ -2,7 +2,7 @@ package nn.utils.Matrix;
 
 public final class Matrix {
     
-    public static double arrayProductAndSum(double[] inputs, double[] weights){
+    public static double weightProductAndSum(double[] inputs, double[] weights){
 
         if (inputs.length + 1 != weights.length){
             throw new IllegalArgumentException("Arrays must be of the same-ish length");
