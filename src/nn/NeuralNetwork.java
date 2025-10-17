@@ -3,7 +3,6 @@ import nn.interfaces.Network;
 import nn.interfaces.ActivationFunction;
 import nn.utils.Matrix.Matrix;
 import nn.utils.ActivationFunctions.Identity;
-    ;
 public class NeuralNetwork implements Network {
     
     private double[][][] weights;
