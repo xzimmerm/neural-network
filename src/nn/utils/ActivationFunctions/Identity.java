@@ -1,5 +1,5 @@
-package utils.ActivationFunctions;
-import interfaces.ActivationFunction;
+package nn.utils.ActivationFunctions;
+import nn.interfaces.ActivationFunction;
 
 public class Identity implements ActivationFunction{
 

@@ -1,3 +1,4 @@
+package nn;
 import nn.interfaces.Network; 
 import nn.interfaces.ActivationFunction;
 import nn.utils.Matrix.Matrix;
@@ -8,7 +9,6 @@ public class NeuralNetwork implements Network {
     private double[][] potentials;
     private double[][] outputs;
     private ActivationFunction[] activationFunctions;
-
 
     public double[] getOuput(){
         return outputs[outputs.length - 1];

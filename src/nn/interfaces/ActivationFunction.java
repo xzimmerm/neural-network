@@ -1,4 +1,4 @@
-package interfaces;
+package nn.interfaces;
 
 public interface ActivationFunction {
     
