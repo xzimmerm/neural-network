@@ -33,7 +33,7 @@ public class FileParser {
 
     public boolean hasNextVector(){
 
-        if(scanner.hasNextLine()){
+        if(scanner.hasNext()){
             return true; 
         }
         else{
