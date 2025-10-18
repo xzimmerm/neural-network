@@ -7,6 +7,13 @@ public static void main(String[] args){
 
     double[] newVector = parser.nextVector();
     System.out.println(newVector.length);
-    System.out.println(newVector);
+    
+    //for(int i = 0; i < newVector.length; i++){
+     // ##  System.out.println(newVector[i]);
+   // }
 
+    newVector = parser.nextVector();
+     for(int i = 0; i < newVector.length; i++){
+        System.out.println(newVector[i]);
+    }
 }}
