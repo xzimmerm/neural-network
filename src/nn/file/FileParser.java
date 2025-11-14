@@ -20,6 +20,10 @@ public class FileParser {
         this.lineLength = lineLength;
     }
 
+    public double nextDouble(){
+        return scanner.nextDouble();
+    }
+    
     public double[] nextVector(){
         double[] vector = new double[lineLength];
 
