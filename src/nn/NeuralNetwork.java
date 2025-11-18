@@ -6,6 +6,7 @@ import java.util.Random;
 import nn.file.FileParser;
 import nn.interfaces.ActivationFunction;
 import nn.utils.Matrix.Matrix;
+import nn.utils.Network.TrainingHelper;
 import nn.utils.ActivationFunctions.Identity;
 import nn.utils.ActivationFunctions.SoftMax;
 public class NeuralNetwork implements Network {
@@ -14,6 +15,7 @@ public class NeuralNetwork implements Network {
     private double[][] potentials;
     private double[][] outputs;
     private ActivationFunction[] activationFunctions;
+    private TrainingHelper trainingHelper;
 
     public static class Builder implements Buildable<NeuralNetwork> {
 
@@ -102,11 +104,6 @@ public class NeuralNetwork implements Network {
         }
     }
 
-    public void train(){
-
-        return;
-    }
-
     public void setInput(double[] inputVector){
         System.arraycopy(inputVector, 0, outputs[0], 0, inputVector.length);
     }
@@ -139,6 +136,22 @@ public class NeuralNetwork implements Network {
     }
 
     public void train(FileParser dataFile, FileParser labelFile, int batchSize){
-        
+
+        while(dataFile.hasNextVector()){
+            for(int batchVectorNumber = 0; batchVectorNumber < batchSize ;  batchVectorNumber++){
+
+                double[] inputVector = dataFile.nextVector();
+                double label = labelFile.nextDouble();
+                setInput(inputVector);
+                invoke();
+                trainingHelper.backpropagate(label);
+
+                if(!dataFile.hasNextVector()){
+                    break;
+                }
+            }
+
+            trainingHelper.takeAStep();
+        }
     }
 }
