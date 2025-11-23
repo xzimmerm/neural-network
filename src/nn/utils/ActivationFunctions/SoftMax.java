@@ -6,24 +6,30 @@ public class SoftMax implements ActivationFunction{
     
     private double[] potentialsVector;
     private double sumExp; 
+    private double max;
 
 
     public void activate(double[] potentialsVector){
-        sumExp = 0;
         this.potentialsVector = potentialsVector;
-
+        max = potentialsVector[0];
+        for(int neuron = 1; neuron < potentialsVector.length; neuron++){
+            if(potentialsVector[neuron] > max){
+                max = potentialsVector[neuron];
+            }
+        }
+        sumExp = 0;
         for(int neuron = 0; neuron < potentialsVector.length; neuron++){
-            sumExp += Math.exp(potentialsVector[neuron]);
+            sumExp += Math.exp(potentialsVector[neuron] - max);
         }
     }
 
     public double activation(double input){
-
-        return Math.exp(input)/sumExp;
+        return Math.exp(input - max)/sumExp;
     }
 
     public double derivation(double input){
-        throw new IllegalStateException("Cannot get derivation of SoftMax without position");
+        
+        return input * (1 - input);
     }
 
     

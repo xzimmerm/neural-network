@@ -6,7 +6,8 @@ import java.util.Random;
 import nn.file.FileParser;
 import nn.interfaces.ActivationFunction;
 import nn.utils.Matrix.Matrix;
-import nn.utils.Network.TrainingHelper;
+import nn.utils.Training.TrainingHelper;
+import nn.utils.ActivationFunctions.Dropout;
 import nn.utils.ActivationFunctions.Identity;
 import nn.utils.ActivationFunctions.SoftMax;
 public class NeuralNetwork implements Network {
@@ -58,6 +59,11 @@ public class NeuralNetwork implements Network {
 
             currLayer++;
 
+            return this;
+        }
+
+        public Builder addDropout(double dropoutRate){
+            activationFunctions[currLayer - 1] = new Dropout(activationFunctions[currLayer - 1], dropoutRate, true);
             return this;
         }
 
@@ -135,23 +141,43 @@ public class NeuralNetwork implements Network {
         }
     }
 
-    public void train(FileParser dataFile, FileParser labelFile, int batchSize){
+    private void changeDropoutMode(boolean trainingMode){
+        for(int layer = 1; layer < activationFunctions.length; layer++){
+            if (activationFunctions[layer] instanceof Dropout){
+                ((Dropout)activationFunctions[layer]).setTrainingMode(trainingMode);
+            }
+        }
+    }
 
+    public void train(FileParser dataFile, FileParser labelFile, int batchSize, double mean, double stdDev){
+        int batchNumber = 0;
+        double learningRate = 1;
+        trainingHelper = new TrainingHelper(weights, outputs, activationFunctions, learningRate, batchSize);
         while(dataFile.hasNextVector()){
+            batchNumber++;
+            System.out.println("New batch number: " + batchNumber);
+            double crossEntropy = 0;
             for(int batchVectorNumber = 0; batchVectorNumber < batchSize ;  batchVectorNumber++){
-
+                crossEntropy = 0;
                 double[] inputVector = dataFile.nextVector();
+                for(int i = 0; i < inputVector.length; i++){
+                   inputVector[i] = (inputVector[i]-mean) / stdDev; // normalize input
+                }
+
                 double label = labelFile.nextDouble();
                 setInput(inputVector);
                 invoke();
-                trainingHelper.backpropagate(label);
-
+                trainingHelper.backpropagate(label, learningRate);
+                crossEntropy += -Math.log(outputs[outputs.length - 1][(int)label] + 1e-15); // to avoid log(0)
                 if(!dataFile.hasNextVector()){
-                    break;
+                    batchVectorNumber = batchSize; // to break the loop
                 }
             }
-
+            System.out.println("Average cross entropy for batch " + batchNumber + ": " + (crossEntropy / batchSize));
             trainingHelper.takeAStep();
+            //learningRate *= 0.99; // decay learning rate
         }
+
+        changeDropoutMode(false); // disable dropout after training
     }
 }
