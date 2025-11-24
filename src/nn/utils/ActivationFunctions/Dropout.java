@@ -33,4 +33,8 @@ public class Dropout implements ActivationFunction{
     public void setTrainingMode(boolean trainingMode){
         this.trainingMode = trainingMode;
     }
+
+    public ActivationFunction getInnerFunction() {
+        return originalAF;
+    }
 }

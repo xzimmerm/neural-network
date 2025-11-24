@@ -74,7 +74,7 @@ public class NeuralNetwork implements Network {
                 int prevLayerSize = outputs[layer - 1].length;
                 for(int neuron = 0; neuron < weights[layer].length; neuron++){
                     for(int weight = 0; weight < weights[layer][neuron].length; weight++){
-                        weights[layer][neuron][weight] = r.nextGaussian()/prevLayerSize; // random value between -1 and 1
+                        weights[layer][neuron][weight] = r.nextGaussian()*(2)/(prevLayerSize); // random value between -1 and 1
                     }
                 }
             }
@@ -122,20 +122,24 @@ public class NeuralNetwork implements Network {
         double[] layerOutputs = outputs[layerNumber];
         ActivationFunction aFunction = activationFunctions[layerNumber];
 
-        if (!(aFunction instanceof SoftMax))
-            for(int neuron = 0; neuron < layerWeightsMatrix.length; neuron++){
-
+    
+        if (aFunction instanceof SoftMax || (aFunction instanceof Dropout && ((Dropout)aFunction).getInnerFunction() instanceof SoftMax)){
+            for (int neuron = 0; neuron < layerWeightsMatrix.length; neuron++){
                 layerPotentials[neuron] = Matrix.weightProductAndSum(prevLayerOutputs, layerWeightsMatrix[neuron]);
+            }
+
+            if (aFunction instanceof Dropout)
+                ((SoftMax)((Dropout)aFunction).getInnerFunction()).activate(layerPotentials);
+            else{
+                ((SoftMax)aFunction).activate(layerPotentials);
+            }
+            for (int neuron = 0; neuron < layerWeightsMatrix.length; neuron++){
                 layerOutputs[neuron] = aFunction.activation(layerPotentials[neuron]);
-
             }
-        else if (aFunction instanceof SoftMax) {
-            for (int neuron = 0; neuron < layerWeightsMatrix.length; neuron++){
+        }
+        else{
+            for(int neuron = 0; neuron < layerWeightsMatrix.length; neuron++){
                 layerPotentials[neuron] = Matrix.weightProductAndSum(prevLayerOutputs, layerWeightsMatrix[neuron]);
-            }
-            ((SoftMax)aFunction).activate(layerPotentials);
-
-            for (int neuron = 0; neuron < layerWeightsMatrix.length; neuron++){
                 layerOutputs[neuron] = aFunction.activation(layerPotentials[neuron]);
             }
         }
@@ -151,14 +155,13 @@ public class NeuralNetwork implements Network {
 
     public void train(FileParser dataFile, FileParser labelFile, int batchSize, double mean, double stdDev){
         int batchNumber = 0;
-        double learningRate = 1;
+        double learningRate = 0.03;
         trainingHelper = new TrainingHelper(weights, outputs, activationFunctions, learningRate, batchSize);
         while(dataFile.hasNextVector()){
             batchNumber++;
             System.out.println("New batch number: " + batchNumber);
             double crossEntropy = 0;
             for(int batchVectorNumber = 0; batchVectorNumber < batchSize ;  batchVectorNumber++){
-                crossEntropy = 0;
                 double[] inputVector = dataFile.nextVector();
                 for(int i = 0; i < inputVector.length; i++){
                    inputVector[i] = (inputVector[i]-mean) / stdDev; // normalize input

@@ -18,10 +18,26 @@ public class FileWriter {
 
     }
 
-    public void writeVector(double[] vector){
+    public void writeVectorDouble(double[] vector){
 
         for(int position = 0; position < vector.length; position++){
             String component = Double.toString(vector[position]);
+            if(position == vector.length - 1){
+                
+                component += '\n';
+
+            }
+            else {
+                component += ',';
+            }
+            writer.write(component);
+        }
+    }
+
+    public void writeVectorInt(int[] vector){
+
+        for(int position = 0; position < vector.length; position++){
+            String component = Integer.toString(vector[position]);
             if(position == vector.length - 1){
                 
                 component += '\n';
