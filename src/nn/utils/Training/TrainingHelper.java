@@ -5,13 +5,13 @@ import nn.utils.Matrix.Matrix;
 
 public class TrainingHelper {
     
-    private double[][][] weights;
+    protected double[][][] weights;
     private double[][] outputs;
     private ActivationFunction[] activationFunctions;
-    private double[][][] batchGradient; 
+    protected double[][][] batchGradient; 
     private double[][] deltas;
-    private double learningRate;
-    private int batchSize;
+    protected double learningRate;
+    protected int batchSize;
 
     public TrainingHelper(double[][][] weights, double[][] outputs, ActivationFunction[] activationFunctions, double learningRate, int batchSize){
         this.weights = weights;

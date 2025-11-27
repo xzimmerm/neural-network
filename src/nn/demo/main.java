@@ -1,8 +1,6 @@
 package nn.demo;
 import nn.file.FileWriter;
 
-import javax.management.relation.RelationException;
-
 import nn.NeuralNetwork;
 import nn.file.FileParser;
 import nn.utils.ActivationFunctions.*;
@@ -17,8 +15,8 @@ public static void main(String[] args){
         //i++;
     //}
     double sum = 0;
-    double mean = 72.9568306122449;
-    double sd = 89.96686299546113;
+    double mean = 0.0;//72.9568306122449;
+    double sd = 255.0;//89.96686299546113;
     // while(trainData.hasNextVector()){
     //     double[] inputVector = trainData.nextVector();
     //     for(int i = 0; i < inputVector.length; i++){
@@ -28,16 +26,20 @@ public static void main(String[] args){
 
     System.out.println("sd: " + Math.sqrt(sum/(60000*28*28)));   
     NeuralNetwork network = new NeuralNetwork.Builder(4, 28*28)
-        .addLayer(128, new ReLU())
+        .addLayer(200, new ReLU())
         .addLayer(64, new ReLU())
         .addLayer(10, new SoftMax())
        .build();
     
+    double learningRate = 0.001;
     for (int epoch = 0; epoch < 5; epoch++){
+    // if (learningRate > 0.01 && epoch >=5 ){
+    //     learningRate = learningRate - 0.01;
+    // }
     FileParser trainData = new FileParser("data/fashion_mnist_train_vectors.csv", 28*28);
     FileParser trainLabels = new FileParser("data/fashion_mnist_train_labels.csv", 1);
-    network.train(trainData, trainLabels, 128, 0, 255);
-    }
+    network.train(trainData, trainLabels, 32, 0, 255, learningRate);
+    } 
     //for(int i = 0; i < newVector.length; i++){
      // ##  System.out.println(newVector[i]);
    // }

@@ -6,6 +6,7 @@ import java.util.Random;
 import nn.file.FileParser;
 import nn.interfaces.ActivationFunction;
 import nn.utils.Matrix.Matrix;
+import nn.utils.Training.AdamTrainingHelper;
 import nn.utils.Training.TrainingHelper;
 import nn.utils.ActivationFunctions.Dropout;
 import nn.utils.ActivationFunctions.Identity;
@@ -153,10 +154,9 @@ public class NeuralNetwork implements Network {
         }
     }
 
-    public void train(FileParser dataFile, FileParser labelFile, int batchSize, double mean, double stdDev){
+    public void train(FileParser dataFile, FileParser labelFile, int batchSize, double mean, double stdDev, double learningRate){
         int batchNumber = 0;
-        double learningRate = 0.03;
-        trainingHelper = new TrainingHelper(weights, outputs, activationFunctions, learningRate, batchSize);
+        trainingHelper = new AdamTrainingHelper(weights, outputs, activationFunctions, learningRate, batchSize, 0.9, 0.999);
         while(dataFile.hasNextVector()){
             batchNumber++;
             System.out.println("New batch number: " + batchNumber);
