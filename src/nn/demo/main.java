@@ -32,25 +32,25 @@ public static void main(String[] args){
         .addDropout(0.25)
         .addLayer(10, new SoftMax())
        .build();
-    
+
     double learningRate = 0.002;
-    for (int epoch = 0; epoch < 5; epoch++){
+    for (int epoch = 0; epoch < 20; epoch++){
     // if (learningRate > 0.01 && epoch >=5 ){
     //     learningRate = learningRate - 0.01;
     // }
     System.out.println("Epoch number: " + (epoch+1));
-    FileParser trainData = new FileParser("data/fashion_mnist_train_vectors.csv", 28*28);
-    FileParser trainLabels = new FileParser("data/fashion_mnist_train_labels.csv", 1);
-    network.train(trainData, trainLabels, 32, mean, sd, learningRate);
-    } 
+    FileParser trainData = new FileParser("../data/fashion_mnist_train_vectors.csv", 28*28);
+    FileParser trainLabels = new FileParser("../data/fashion_mnist_train_labels.csv", 1);
+    network.train(trainData, trainLabels, 80, mean, sd, learningRate);
+    }
     //for(int i = 0; i < newVector.length; i++){
      // ##  System.out.println(newVector[i]);
    // }
 
-    FileParser testData = new FileParser("data/fashion_mnist_test_vectors.csv", 28*28);
+    FileParser testData = new FileParser("../data/fashion_mnist_test_vectors.csv", 28*28);
     
-    FileWriter writer = new FileWriter("data/fashion_mnist_test_predictions.csv");
-    FileParser testLabels = new FileParser("data/fashion_mnist_test_labels.csv", 1);
+    FileWriter writer = new FileWriter("../data/fashion_mnist_test_predictions.csv");
+    FileParser testLabels = new FileParser("../data/fashion_mnist_test_labels.csv", 1);
     int counter = 0;
     while(testData.hasNextVector()){
         double[] inputVector = testData.nextVector();
