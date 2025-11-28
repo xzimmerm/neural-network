@@ -7,7 +7,7 @@ import nn.utils.ActivationFunctions.*;
 import nn.utils.Matrix.Matrix;
 class Main {
 public static void main(String[] args){
-    
+    long startTime = System.currentTimeMillis();
     //int i = 0 ;
     //while(parser.hasNextVector()){
         //parser.nextVector();
@@ -33,8 +33,8 @@ public static void main(String[] args){
         .addLayer(10, new SoftMax())
        .build();
     
-    double learningRate = 0.001;
-    for (int epoch = 0; epoch < 20; epoch++){
+    double learningRate = 0.002;
+    for (int epoch = 0; epoch < 5; epoch++){
     // if (learningRate > 0.01 && epoch >=5 ){
     //     learningRate = learningRate - 0.01;
     // }
@@ -72,6 +72,8 @@ public static void main(String[] args){
 
 writer.close();
 System.out.println("Accuracy: " + ((double)counter / 10000.0) * 100.0 + "%");
+long endTime = System.currentTimeMillis();
+System.out.println("Total time: " + (endTime - startTime)/1000.0 + " seconds");
 }}
 
     // public static void main(String[] args) {

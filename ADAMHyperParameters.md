@@ -33,9 +33,12 @@
 ## ReLU(200), Dropout(0.25), ReLU(64), Dropout(0.25) SoftMax
 - 20 epochs, batch size: 32, learning rate: 0.001, acc: 81.81%
 - (updated dropout) 6 epochs, batch size:32, learning rate: 0.001, acc: 82,12%
-- (updated dropout) 20 epochs, batch size: 32, learning rate: 0.001, acc: 
+- (updated dropout) 20 epochs, batch size: 32, learning rate: 0.001, acc: 84.24000000000001%
 
-- (updated) 20 epochs, batch size: 32, learning rate: 
+- (updated) 5 epochs, batch size: 32, learning rate: 0.002, acc
+- (updated) 20 epochs, batch size: 32, learning rate: 0.002, acc:
+  
+- (updated) 20 epochs, batch size: 80, learning rate:0.001, acc: 81.64% 
 
 ## ReLU(128), Dropout(0.25), ReLU(64), Dropout(0.25), SoftMax
 - 5 epochs, batch size: 32, learning rate: 0.001, acc: 81.55%
