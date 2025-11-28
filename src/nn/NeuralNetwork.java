@@ -8,7 +8,6 @@ import nn.interfaces.ActivationFunction;
 import nn.utils.Matrix.Matrix;
 import nn.utils.Training.AdamTrainingHelper;
 import nn.utils.Training.TrainingHelper;
-import nn.utils.ActivationFunctions.Dropout;
 import nn.utils.ActivationFunctions.Identity;
 import nn.utils.ActivationFunctions.SoftMax;
 public class NeuralNetwork implements Network {
@@ -17,7 +16,11 @@ public class NeuralNetwork implements Network {
     private double[][] potentials;
     private double[][] outputs;
     private ActivationFunction[] activationFunctions;
-    private TrainingHelper trainingHelper;
+    private TrainingHelper trainingHelper = null;
+    private String dropoutMode = null;
+    private double[] dropoutRates;
+    private boolean[][] dropoutMasks;
+
 
     public static class Builder implements Buildable<NeuralNetwork> {
 
@@ -27,6 +30,9 @@ public class NeuralNetwork implements Network {
         private ActivationFunction[] activationFunctions;
         private int numberOfLayers;
         private int currLayer;
+        private double[] dropoutRates;
+        private boolean[][] dropoutMasks;
+        private String dropoutMode = null; 
 
         public Builder(int numberOfLayers, int inputSize){
             currLayer = 0;
@@ -36,6 +42,8 @@ public class NeuralNetwork implements Network {
             potentials = new double[numberOfLayers][];
             outputs = new double[numberOfLayers][];
             activationFunctions = new ActivationFunction[numberOfLayers];
+            dropoutMasks = new boolean[numberOfLayers][];
+            dropoutRates = new double[numberOfLayers];
 
             outputs[currLayer] = new double[inputSize]; // allocate the input neurons
             potentials[currLayer] = outputs[currLayer]; // just to have something there and be consistent
@@ -64,7 +72,10 @@ public class NeuralNetwork implements Network {
         }
 
         public Builder addDropout(double dropoutRate){
-            activationFunctions[currLayer - 1] = new Dropout(activationFunctions[currLayer - 1], dropoutRate, true);
+
+            dropoutMode = "train";
+            dropoutRates[currLayer - 1] = dropoutRate;
+            dropoutMasks[currLayer - 1] = new boolean[outputs[currLayer - 1].length];
             return this;
         }
 
@@ -87,18 +98,21 @@ public class NeuralNetwork implements Network {
                 throw new IllegalStateException("Not all layers have been added");
             }
             initializeWeights();
-            NeuralNetwork network = new NeuralNetwork(weights, potentials, outputs, activationFunctions);
+            NeuralNetwork network = new NeuralNetwork(weights, potentials, outputs, activationFunctions, dropoutMode, dropoutRates, dropoutMasks);
 
             
             return network;
         }
     }
 
-    public NeuralNetwork(double[][][] weights, double[][] potentials, double[][] outputs, ActivationFunction[] activationFunctions){
+    public NeuralNetwork(double[][][] weights, double[][] potentials, double[][] outputs, ActivationFunction[] activationFunctions, String dropoutMode, double[] dropoutRates, boolean[][] dropoutMasks){ 
         this.weights = weights;
         this.potentials = potentials; 
         this.outputs = outputs;
         this.activationFunctions = activationFunctions;
+        this.dropoutMode = dropoutMode;
+        this.dropoutRates = dropoutRates;
+        this.dropoutMasks = dropoutMasks;
     }
 
     public double[] getOuput(){
@@ -107,7 +121,12 @@ public class NeuralNetwork implements Network {
 
     public void invoke(){
         for(int layer = 1; layer < outputs.length; layer++){
-            resolveLayer(layer);
+            if(dropoutMode != null && dropoutRates[layer] > 0){
+                resolveDropoutLayer(layer);
+            }
+            else{
+                resolveLayer(layer);
+            }
         }
     }
 
@@ -124,16 +143,13 @@ public class NeuralNetwork implements Network {
         ActivationFunction aFunction = activationFunctions[layerNumber];
 
     
-        if (aFunction instanceof SoftMax || (aFunction instanceof Dropout && ((Dropout)aFunction).getInnerFunction() instanceof SoftMax)){
+        if (aFunction instanceof SoftMax){
             for (int neuron = 0; neuron < layerWeightsMatrix.length; neuron++){
                 layerPotentials[neuron] = Matrix.weightProductAndSum(prevLayerOutputs, layerWeightsMatrix[neuron]);
             }
 
-            if (aFunction instanceof Dropout)
-                ((SoftMax)((Dropout)aFunction).getInnerFunction()).activate(layerPotentials);
-            else{
-                ((SoftMax)aFunction).activate(layerPotentials);
-            }
+            ((SoftMax)aFunction).activate(layerPotentials);
+            
             for (int neuron = 0; neuron < layerWeightsMatrix.length; neuron++){
                 layerOutputs[neuron] = aFunction.activation(layerPotentials[neuron]);
             }
@@ -146,17 +162,71 @@ public class NeuralNetwork implements Network {
         }
     }
 
-    private void changeDropoutMode(boolean trainingMode){
-        for(int layer = 1; layer < activationFunctions.length; layer++){
-            if (activationFunctions[layer] instanceof Dropout){
-                ((Dropout)activationFunctions[layer]).setTrainingMode(trainingMode);
+    private void resolveDropoutLayer(int layerNumber){
+
+            double layerPotentials[] = potentials[layerNumber];
+            double layerOutputs[] = outputs[layerNumber];
+            ActivationFunction aFunction = activationFunctions[layerNumber];
+            double[][] layerWeightsMatrix = weights[layerNumber];
+            double[] prevLayerOutputs = outputs[layerNumber - 1];
+
+        if (dropoutMode.equals("inference")){
+            for(int neuron = 0; neuron < outputs[layerNumber].length; neuron++){
+                layerPotentials[neuron] = Matrix.weightProductAndSum(prevLayerOutputs, layerWeightsMatrix[neuron]) * (1.0 - dropoutRates[layerNumber]);
+                layerOutputs[neuron] = aFunction.activation(layerPotentials[neuron]);
+            
+            }
+        } else{
+            for(int neuron = 0; neuron < layerWeightsMatrix.length; neuron++){
+                if(dropoutMasks[layerNumber][neuron]){
+                    layerPotentials[neuron] = 0.0;
+                    layerOutputs[neuron] = 0.0;
+                }
+                else{
+                layerPotentials[neuron] = Matrix.weightProductAndSum(prevLayerOutputs, layerWeightsMatrix[neuron]);
+                layerOutputs[neuron] = aFunction.activation(layerPotentials[neuron]);
+                }
             }
         }
     }
 
+    private void changeDropoutMode(boolean trainingMode){
+        if(trainingMode){
+            dropoutMode = "train";
+           // setDropoutMode();
+        } else {
+            dropoutMode = "inference";
+        }
+    }
+
+    private void setDropoutMasks(){
+        Random r = new Random();
+        for(int layer = 1; layer < outputs.length; layer++){
+            if(dropoutRates[layer] > 0){
+                for(int neuron = 0; neuron < outputs[layer].length; neuron++){
+                    double prob = r.nextDouble();
+                    if (prob < dropoutRates[layer]){
+                        dropoutMasks[layer][neuron] = true; // drop this neuron
+                    } else {
+                        dropoutMasks[layer][neuron] = false; // keep this neuron
+                    }
+                }
+        }
+        }
+    }
+
     public void train(FileParser dataFile, FileParser labelFile, int batchSize, double mean, double stdDev, double learningRate){
+        
         int batchNumber = 0;
-        trainingHelper = new AdamTrainingHelper(weights, outputs, activationFunctions, learningRate, batchSize, 0.9, 0.999);
+        if (trainingHelper == null){
+            trainingHelper = new AdamTrainingHelper(weights, outputs, activationFunctions, learningRate, batchSize, 0.9, 0.999, dropoutRates, dropoutMasks);
+        }
+
+        if (dropoutMode != null){
+            changeDropoutMode(true);
+            setDropoutMasks();
+        }
+        
         while(dataFile.hasNextVector()){
             batchNumber++;
             System.out.println("New batch number: " + batchNumber);
