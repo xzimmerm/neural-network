@@ -40,6 +40,8 @@
   
 - (updated) 20 epochs, batch size: 80, learning rate:0.001, acc: 81.64% 
 
+- (updated) 20 epochs, batch size: 80, learning rate: 0.002, acc: 84.66%
+
 ## ReLU(128), Dropout(0.25), ReLU(64), Dropout(0.25), SoftMax
 - 5 epochs, batch size: 32, learning rate: 0.001, acc: 81.55%
 - 10 epochs, batch size: 32, learning rate: 0.001, acc: 82.94%\
