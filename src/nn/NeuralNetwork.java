@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Random;
 
-import nn.file.FileParser;
 import nn.interfaces.ActivationFunction;
 import nn.utils.Matrix.Matrix;
 import nn.utils.Training.AdamTrainingHelper;
@@ -219,49 +218,10 @@ public class NeuralNetwork implements Network {
         }
     }
 
-    public void train(FileParser dataFile, FileParser labelFile, int batchSize, double mean, double stdDev, double learningRate){
-        
-        int batchNumber = 0;
-        if (trainingHelper == null){
-            trainingHelper = new AdamTrainingHelper(weights, outputs,potentials, activationFunctions, learningRate, batchSize, 0.9f, 0.999f);
-        }
-
-        if (dropoutMode != null){
-            changeDropoutMode(true);
-            setDropoutMasks();
-        }
-        
-        while(dataFile.hasNextVector()){
-            batchNumber++;
-            System.out.println("New batch number: " + batchNumber);
-            double crossEntropy = 0;
-            for(int batchVectorNumber = 0; batchVectorNumber < batchSize ;  batchVectorNumber++){
-                double[] inputVector = dataFile.nextVector();
-                // for(int i = 0; i < inputVector.length; i++){
-                //    inputVector[i] = (inputVector[i]-mean) / stdDev; // normalize input
-                // }
-
-                double label = labelFile.nextDouble();
-                setInput(inputVector);
-                invoke();
-                trainingHelper.backpropagate(label, learningRate);
-                crossEntropy += -Math.log(outputs[outputs.length - 1][(int)label] + 1e-15); // to avoid log(0)
-                if(!dataFile.hasNextVector()){
-                    batchVectorNumber = batchSize; // to break the loop
-                }
-            }
-            System.out.println("Average cross entropy for batch " + batchNumber + ": " + (crossEntropy / batchSize));
-            trainingHelper.takeAStep();
-            //learningRate *= 0.99; // decay learning rate
-        }
-
-        changeDropoutMode(false); // disable dropout after training
-    }
-
     private void trainingEpoch(ArrayList<Vector> trainSet, double learningRate, int epoch, int batchSize, double trainSetSize){
         
         double numberOfBatches = trainSetSize / batchSize;
-        Collections.shuffle(trainSet);
+        Collections.shuffle(trainSet.subList(0,(int)trainSetSize));
         double crossEntropyEpoch = 0;
         double batch = 0;
         Iterator<Vector> trainSetIterator = trainSet.iterator();
@@ -286,7 +246,7 @@ public class NeuralNetwork implements Network {
             
         }
         System.out.println("Average cross entropy for epoch " + (epoch + 1) + ": " + crossEntropyEpoch/numberOfBatches);
-         // disable dropout after training
+         
         validationEpoch(trainSetIterator);
     }
 
@@ -304,7 +264,7 @@ public class NeuralNetwork implements Network {
             setInput(valVector.data);
             invoke();
             int predictedLabel = Matrix.maxValueIndex(outputs[outputs.length - 1]);
-            if (predictedLabel == (int)valVector.label){
+            if (predictedLabel == valVector.label){
                 correctPredictions++;
             }
             }

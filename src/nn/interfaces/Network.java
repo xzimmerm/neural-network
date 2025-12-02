@@ -1,10 +1,12 @@
 package nn.interfaces;
 
-import nn.file.FileParser;
+import java.util.ArrayList;
+
+import nn.testset.Vector;
 
 public interface Network {
 
-    public void train(FileParser dataFile, FileParser labelFile, int batchSize, double mean, double stdDev, double learningRate);
+    public void train(ArrayList<Vector> trainSet, double trainSetSize, double learningRate, int epochs, int batchSize);
 
     public void invoke();
 

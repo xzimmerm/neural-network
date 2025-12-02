@@ -62,13 +62,13 @@ public static void main(String[] args){
         double[] outputVector = network.getOuput();
         int predictedLabel = Matrix.maxValueIndex(outputVector);
         writer.writeLabel(predictedLabel);
-        if (predictedLabel == (int)label){
+        if (predictedLabel == label){
             counter++;
         }
     }   
 
     writer.close();
-    System.out.println("Test Accuracy: " + (counter / 10000) * 100.0 + "%");
+    System.out.println("Test Accuracy: " + ((double)counter / 10000.0) * 100.0 + "%");
 
     writer = new FileWriter("train_predictions.csv");
     Iterator<Vector> trainEval = trainSetEval.iterator();
@@ -80,12 +80,12 @@ public static void main(String[] args){
         double[] outputVector = network.getOuput();
         int predictedLabel = Matrix.maxValueIndex(outputVector);
         writer.writeLabel(predictedLabel);
-        if (predictedLabel == (int)vector.label){
+        if (predictedLabel == vector.label){
             counter++;
         }
     }
     writer.close();
-    System.out.println("Train Accuracy: " + (counter / 60000) * 100.0 + "%");
+    System.out.println("Train Accuracy: " + ((double)counter / 60000.00) * 100.0 + "%");
 
     long endTime = System.currentTimeMillis();
     System.out.println("Total time: " + (endTime - startTime)/1000.0 + " seconds");
