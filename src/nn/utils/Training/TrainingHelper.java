@@ -7,15 +7,17 @@ public class TrainingHelper {
     
     protected double[][][] weights;
     private double[][] outputs;
+    protected double[][] potentials;
     private ActivationFunction[] activationFunctions;
     protected double[][][] batchGradient; 
     private double[][] deltas;
     protected double learningRate;
     protected int batchSize;
 
-    public TrainingHelper(double[][][] weights, double[][] outputs, ActivationFunction[] activationFunctions, double learningRate, int batchSize){
+    public TrainingHelper(double[][][] weights, double[][] outputs, double[][] potentials, ActivationFunction[] activationFunctions, double learningRate, int batchSize){
         this.weights = weights;
         this.outputs = outputs;
+        this.potentials = potentials;
         this.activationFunctions = activationFunctions;
         this.learningRate = learningRate;
         this.batchSize = batchSize;
@@ -75,15 +77,16 @@ public class TrainingHelper {
         double[] outputsLayer = outputs[layer];
         double[] nextLayerDeltas = deltas[layer + 1];
         double[][] nextLayerWeights = weights[layer + 1];
+        double[] potentialsLayer = potentials[layer];
         double sum;
 
         for(int neuron = 0; neuron < deltasLayer.length; neuron++){
             sum = 0;
-            if(af.derivation(outputsLayer[neuron]) != 0){
+            if(af.derivation(potentialsLayer[neuron]) != 0){
                 for(int nextNeuron = 0; nextNeuron < nextLayerDeltas.length; nextNeuron++){
                     sum += nextLayerWeights[nextNeuron][neuron + 1] * nextLayerDeltas[nextNeuron];
                 }
-                deltasLayer[neuron] = sum * af.derivation(outputsLayer[neuron]);
+                deltasLayer[neuron] = sum * af.derivation(potentialsLayer[neuron]);
             } else {
                 deltasLayer[neuron] = 0;
             }

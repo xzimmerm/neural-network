@@ -1,6 +1,10 @@
 package nn;
 import nn.interfaces.Network;
+import nn.testset.Vector;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.Random;
 
 import nn.file.FileParser;
@@ -172,15 +176,15 @@ public class NeuralNetwork implements Network {
 
         if (dropoutMode.equals("inference")){
             for(int neuron = 0; neuron < outputs[layerNumber].length; neuron++){
-                layerPotentials[neuron] = Matrix.weightProductAndSum(prevLayerOutputs, layerWeightsMatrix[neuron]) * (1.0 - dropoutRates[layerNumber]);
+                layerPotentials[neuron] = Matrix.weightProductAndSum(prevLayerOutputs, layerWeightsMatrix[neuron]) *(double) (1.0 - dropoutRates[layerNumber]);
                 layerOutputs[neuron] = aFunction.activation(layerPotentials[neuron]);
             
             }
         } else{
             for(int neuron = 0; neuron < layerWeightsMatrix.length; neuron++){
                 if(dropoutMasks[layerNumber][neuron]){
-                    layerPotentials[neuron] = 0.0;
-                    layerOutputs[neuron] = 0.0;
+                    layerPotentials[neuron] = 0;
+                    layerOutputs[neuron] = 0;
                 }
                 else{
                 layerPotentials[neuron] = Matrix.weightProductAndSum(prevLayerOutputs, layerWeightsMatrix[neuron]);
@@ -219,7 +223,7 @@ public class NeuralNetwork implements Network {
         
         int batchNumber = 0;
         if (trainingHelper == null){
-            trainingHelper = new AdamTrainingHelper(weights, outputs, activationFunctions, learningRate, batchSize, 0.9, 0.999, dropoutRates, dropoutMasks);
+            trainingHelper = new AdamTrainingHelper(weights, outputs,potentials, activationFunctions, learningRate, batchSize, 0.9f, 0.999f, dropoutRates, dropoutMasks);
         }
 
         if (dropoutMode != null){
@@ -233,9 +237,9 @@ public class NeuralNetwork implements Network {
             double crossEntropy = 0;
             for(int batchVectorNumber = 0; batchVectorNumber < batchSize ;  batchVectorNumber++){
                 double[] inputVector = dataFile.nextVector();
-                for(int i = 0; i < inputVector.length; i++){
-                   inputVector[i] = (inputVector[i]-mean) / stdDev; // normalize input
-                }
+                // for(int i = 0; i < inputVector.length; i++){
+                //    inputVector[i] = (inputVector[i]-mean) / stdDev; // normalize input
+                // }
 
                 double label = labelFile.nextDouble();
                 setInput(inputVector);
@@ -252,5 +256,81 @@ public class NeuralNetwork implements Network {
         }
 
         changeDropoutMode(false); // disable dropout after training
+    }
+
+    private void trainingEpoch(ArrayList<Vector> trainSet, double learningRate, int epoch, int batchSize, double trainSetSize){
+        
+        double numberOfBatches = trainSetSize / batchSize;
+        Collections.shuffle(trainSet);
+        double crossEntropyEpoch = 0;
+        double batch = 0;
+        Iterator<Vector> trainSetIterator = trainSet.iterator();
+        while(batch < numberOfBatches){
+            if (dropoutMode != null){
+                setDropoutMasks();
+            }
+            double crossEntropy = 0;
+            int batchVector = 0;
+            while(batchVector < batchSize){
+                Vector vector = trainSetIterator.next();
+                setInput(vector.data);
+                invoke();
+                trainingHelper.backpropagate(vector.label, learningRate);
+                crossEntropy += -Math.log(outputs[outputs.length - 1][(int)vector.label] + 1e-15);
+                batchVector++;
+            }
+            System.out.println("Average cross entropy for batch " + (batch + 1) + ": " + (crossEntropy / batchSize));
+            crossEntropyEpoch += crossEntropy / batchSize;
+            trainingHelper.takeAStep();
+            batch++;
+            
+        }
+        System.out.println("Average cross entropy for epoch " + (epoch + 1) + ": " + crossEntropyEpoch/numberOfBatches);
+         // disable dropout after training
+        validationEpoch(trainSetIterator);
+    }
+
+    private void validationEpoch(Iterator<Vector> valSetIterator){
+        int correctPredictions = 0;
+        
+        if (dropoutMode != null){
+            changeDropoutMode(false); // disable dropout for validation
+        }
+        int vectorCount = 0;
+        Vector valVector;
+        while(valSetIterator.hasNext()){
+            valVector = valSetIterator.next();
+            vectorCount++;
+            setInput(valVector.data);
+            invoke();
+            int predictedLabel = Matrix.maxValueIndex(outputs[outputs.length - 1]);
+            if (predictedLabel == (int)valVector.label){
+                correctPredictions++;
+            }
+            }
+        
+        System.out.println("Validation accuracy: " + ((double)correctPredictions / vectorCount) * 100.0 + "%");
+
+        if(dropoutMode != null){
+            changeDropoutMode(true); // enable dropout back for training
+        }
+    } 
+    public void train(ArrayList<Vector> trainSet, double trainSetSize, double learningRate, int epochs, int batchSize){
+        
+        if (trainingHelper == null){
+            trainingHelper = new AdamTrainingHelper(weights, outputs, potentials, activationFunctions, learningRate, batchSize, 0.9f, 0.999f, dropoutRates, dropoutMasks);
+        }
+        if (dropoutMode != null){
+            changeDropoutMode(true);
+        }
+
+        for(int epoch = 0;epoch < epochs; epoch++){
+            System.out.println("Epoch number: " + (epoch + 1));
+            trainingEpoch(trainSet, learningRate, epoch, batchSize, trainSetSize);
+        }
+
+        if(dropoutMode != null){
+            changeDropoutMode(false); // disable dropout after training
+        }
     }
 }

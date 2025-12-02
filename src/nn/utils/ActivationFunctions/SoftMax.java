@@ -24,7 +24,7 @@ public class SoftMax implements ActivationFunction{
     }
 
     public double activation(double input){
-        return Math.exp(input - max)/sumExp;
+        return (Math.exp(input - max))/sumExp;
     }
 
     public double derivation(double input){

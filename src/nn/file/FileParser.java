@@ -6,9 +6,13 @@ import java.util.Scanner;
 
 public class FileParser {
     private Scanner scanner; 
-    private int lineLength; 
+    private int lineLength;
+    private double normalizationSd;
+    private double normalizationMean ;
 
-    public FileParser(String filePath, int lineLength){
+    public FileParser(String filePath,double normalization_sd, double normalizationMean, int lineLength){
+        this.normalizationSd = normalization_sd;
+        this.normalizationMean = normalizationMean;
         File f = new File(filePath);
         try{
             this.scanner = new Scanner(f).useDelimiter(",|\\n"); // delimiter are both comma and newline 
@@ -29,7 +33,7 @@ public class FileParser {
 
 
         for(int position = 0; position < lineLength; position++){
-            vector[position] = scanner.nextDouble();
+            vector[position] = (scanner.nextDouble()- normalizationMean)/normalizationSd;
         }
 
         return vector;

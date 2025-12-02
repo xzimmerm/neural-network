@@ -11,7 +11,7 @@ public final class ReLU implements ActivationFunction {
 
     public double derivation(double input){
 
-        if (input >= 0){
+        if (input > 0){
             return 1;
         } else {
             return 0;
