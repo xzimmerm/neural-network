@@ -18,7 +18,6 @@ public static void main(String[] args){
         //System.out.println(i);
         //i++;
     //}
-    double sum = 0;
     double mean = 0;//72.9568306122449;
     double sd = 255;//89.96686299546113;
     // while(trainData.hasNextVector()){
@@ -27,26 +26,22 @@ public static void main(String[] args){
     //         sum += Math.pow(inputVector[i] - mean,2); // normalize input
     //     }
     // }
-
-    System.out.println("sd: " + Math.sqrt(sum/(60000*28*28)));   
+  
     NeuralNetwork network = new NeuralNetwork.Builder(4, 28*28)
         .addLayer(128, new ReLU())
         .addLayer(64, new ReLU())
         .addLayer(10, new SoftMax())
        .build();
     int batchSize = 32;
-    int numberOfBatches = 60000 / batchSize;
     double trainSetSize = 60000 * 0.8;
-    double valSetSize = (60000 - trainSetSize);
-    
+    double learningRate = 0.001;
+    int epochs = 25;
 
     FileParser trainData = new FileParser("data/fashion_mnist_train_vectors.csv",sd, mean, 28*28);
     FileParser trainLabels = new FileParser("data/fashion_mnist_train_labels.csv",sd, mean,1);
 
     ArrayList<Vector> trainSet = new ArrayList<>();
     SetParser.parseTestSet(trainData, trainLabels, trainSet);
-    double learningRate = 0.001;
-    int epochs = 25;
 
     network.train(trainSet, trainSetSize, learningRate, epochs, batchSize);
 
@@ -62,8 +57,6 @@ public static void main(String[] args){
         network.invoke();
         double[] outputVector = network.getOuput();
         int predictedLabel = Matrix.maxValueIndex(outputVector);
-        double val = outputVector[predictedLabel];
-        //System.out.println("Vector no. " + counter +"predicted label: " + predictedLabel + "value:" + val);
         writer.writeLabel(predictedLabel);
         if (predictedLabel == (int)label){
             counter++;

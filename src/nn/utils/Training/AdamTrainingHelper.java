@@ -6,16 +6,12 @@ public class AdamTrainingHelper extends TrainingHelper {
     double beta2;
     double momentumMatrix[][][];
     double rmsMatrix[][][];
-    double[] dropoutRates;
-    boolean[][] dropoutMasks;
 
-    public AdamTrainingHelper(double[][][] weights, double[][] outputs, double[][] potentials,  nn.interfaces.ActivationFunction[] activationFunctions, double learningRate, int batchSize, double beta1, double beta2, double[] dropoutRates, boolean[][] dropoutMasks) {
+    public AdamTrainingHelper(double[][][] weights, double[][] outputs, double[][] potentials,  nn.interfaces.ActivationFunction[] activationFunctions, double learningRate, int batchSize, double beta1, double beta2) {
         super(weights, outputs, potentials, activationFunctions, learningRate, batchSize);
 
         this.beta1 = beta1;
         this.beta2 = beta2;
-        this.dropoutRates = dropoutRates;
-        this.dropoutMasks = dropoutMasks;
         momentumMatrix = new double[weights.length][][];
         rmsMatrix = new double[weights.length][][];
         for(int layer =1; layer < weights.length; layer++){
@@ -32,9 +28,7 @@ public class AdamTrainingHelper extends TrainingHelper {
     public void takeAStep(){
         double mHat;
         double rmsHat;
-        double layerDropoutRate;
         for(int layer = 1; layer < weights.length; layer++){
-            layerDropoutRate = dropoutRates[layer];
             for(int neuron = 0; neuron < weights[layer].length; neuron++){
                
                     for(int weight = 0; weight < weights[layer][neuron].length; weight++){

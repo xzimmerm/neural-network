@@ -223,7 +223,7 @@ public class NeuralNetwork implements Network {
         
         int batchNumber = 0;
         if (trainingHelper == null){
-            trainingHelper = new AdamTrainingHelper(weights, outputs,potentials, activationFunctions, learningRate, batchSize, 0.9f, 0.999f, dropoutRates, dropoutMasks);
+            trainingHelper = new AdamTrainingHelper(weights, outputs,potentials, activationFunctions, learningRate, batchSize, 0.9f, 0.999f);
         }
 
         if (dropoutMode != null){
@@ -318,7 +318,7 @@ public class NeuralNetwork implements Network {
     public void train(ArrayList<Vector> trainSet, double trainSetSize, double learningRate, int epochs, int batchSize){
         
         if (trainingHelper == null){
-            trainingHelper = new AdamTrainingHelper(weights, outputs, potentials, activationFunctions, learningRate, batchSize, 0.9f, 0.999f, dropoutRates, dropoutMasks);
+            trainingHelper = new AdamTrainingHelper(weights, outputs, potentials, activationFunctions, learningRate, batchSize, 0.9f, 0.999f);
         }
         if (dropoutMode != null){
             changeDropoutMode(true);

@@ -1,7 +1,5 @@
 package nn.testset;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.util.ArrayList;
 
 import nn.file.FileParser;

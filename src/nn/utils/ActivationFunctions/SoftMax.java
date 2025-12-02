@@ -4,13 +4,11 @@ import nn.interfaces.ActivationFunction;
 
 public class SoftMax implements ActivationFunction{
     
-    private double[] potentialsVector;
     private double sumExp; 
     private double max;
 
 
     public void activate(double[] potentialsVector){
-        this.potentialsVector = potentialsVector;
         max = potentialsVector[0];
         for(int neuron = 1; neuron < potentialsVector.length; neuron++){
             if(potentialsVector[neuron] > max){

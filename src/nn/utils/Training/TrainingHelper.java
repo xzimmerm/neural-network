@@ -56,11 +56,8 @@ public class TrainingHelper {
     }
 
     private void outputLayerDelta(double correctLabel){
-        ActivationFunction af = activationFunctions[activationFunctions.length - 1];
         double[] deltasLayer = deltas[deltas.length - 1];
         double output;
-        double error;
-        double classification;
         for(int neuron = 0; neuron < deltas[deltas.length - 1].length; neuron++){
             output = outputs[outputs.length - 1][neuron];
             if (correctLabel == neuron){
@@ -74,7 +71,6 @@ public class TrainingHelper {
     private void hiddenLayerDelta(int layer){
         ActivationFunction af = activationFunctions[layer];
         double[] deltasLayer = deltas[layer];
-        double[] outputsLayer = outputs[layer];
         double[] nextLayerDeltas = deltas[layer + 1];
         double[][] nextLayerWeights = weights[layer + 1];
         double[] potentialsLayer = potentials[layer];
@@ -102,7 +98,6 @@ public class TrainingHelper {
             for(int neuron = 0; neuron < batchGradientLayer.length; neuron++){
                 batchGradientLayer[neuron][0] += deltasLayer[neuron]; // bias weight
                 for(int weight = 1; weight < batchGradientLayer[neuron].length; weight++){
-                    boolean check = Double.isNaN(batchGradientLayer[neuron][weight]);
                     batchGradientLayer[neuron][weight] += deltasLayer[neuron] * outputsPrevLayer[weight - 1];
                     
                 }
