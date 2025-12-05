@@ -13,6 +13,10 @@ import nn.utils.Training.AdamTrainingHelper;
 import nn.utils.Training.TrainingHelper;
 import nn.utils.ActivationFunctions.Identity;
 import nn.utils.ActivationFunctions.SoftMax;
+
+/**
+ * Implementation of a neural network
+ */
 public class NeuralNetwork implements Network {
     
     private double[][][] weights;
@@ -37,6 +41,11 @@ public class NeuralNetwork implements Network {
         private boolean[][] dropoutMasks;
         private String dropoutMode = null; 
 
+        /**
+         * Starts building a neural network
+         * @param numberOfLayers number of total layers, input and output is counted
+         * @param inputSize the size of the input layer
+         */
         public Builder(int numberOfLayers, int inputSize){
             currLayer = 0;
             this.numberOfLayers = numberOfLayers;
@@ -56,6 +65,12 @@ public class NeuralNetwork implements Network {
 
         }
 
+        /**
+         * 
+         * @param numberOfNeurons the number of neurons in the layer
+         * @param activationFunction activation function which the neurons should use
+         * @return
+         */
         public Builder addLayer(int numberOfNeurons, ActivationFunction activationFunction){
 
             if (currLayer >= numberOfLayers){
@@ -74,6 +89,11 @@ public class NeuralNetwork implements Network {
             return this;
         }
 
+        /**
+         * Adds Dropout to the previous layer
+         * @param dropoutRate
+         * @return
+         */
         public Builder addDropout(double dropoutRate){
 
             dropoutMode = "train";
@@ -118,10 +138,16 @@ public class NeuralNetwork implements Network {
         this.dropoutMasks = dropoutMasks;
     }
 
+    /**
+     * Gets vector of values of the output layer
+     */
     public double[] getOuput(){
         return outputs[outputs.length - 1];
     }
 
+    /**
+     * Inference function to compute the the state of the neural network with a given input
+     */
     public void invoke(){
         for(int layer = 1; layer < outputs.length; layer++){
             if(dropoutMode != null && dropoutRates[layer] > 0){
@@ -132,11 +158,18 @@ public class NeuralNetwork implements Network {
             }
         }
     }
-
+    
+    /**
+     * Sets the input layer of the nn
+     */
     public void setInput(double[] inputVector){
         System.arraycopy(inputVector, 0, outputs[0], 0, inputVector.length);
     }
 
+    /**
+     * Computes the potentials and outputs of a given layer
+     * @param layerNumber
+     */
     private void resolveLayer(int layerNumber){
         
         double[][] layerWeightsMatrix = weights[layerNumber]; 
@@ -165,6 +198,10 @@ public class NeuralNetwork implements Network {
         }
     }
 
+    /**
+     * Used to resolve layers which have dropout
+     * @param layerNumber
+     */
     private void resolveDropoutLayer(int layerNumber){
 
             double layerPotentials[] = potentials[layerNumber];
@@ -193,6 +230,10 @@ public class NeuralNetwork implements Network {
         }
     }
 
+    /**
+     * Used to change between inference and train mode
+     * @param trainingMode true is train, false is inference
+     */
     private void changeDropoutMode(boolean trainingMode){
         if(trainingMode){
             dropoutMode = "train";
@@ -202,6 +243,9 @@ public class NeuralNetwork implements Network {
         }
     }
 
+    /**
+     * Computes new dropout masks used to exclude neurons in resolving layers
+     */
     private void setDropoutMasks(){
         Random r = new Random();
         for(int layer = 1; layer < outputs.length; layer++){
@@ -218,6 +262,14 @@ public class NeuralNetwork implements Network {
         }
     }
 
+    /**
+     * One epoch of training
+     * @param trainSet
+     * @param learningRate
+     * @param epoch
+     * @param batchSize
+     * @param trainSetSize
+     */
     private void trainingEpoch(ArrayList<Vector> trainSet, double learningRate, int epoch, int batchSize, double trainSetSize){
         
         double numberOfBatches = trainSetSize / batchSize;
@@ -250,6 +302,10 @@ public class NeuralNetwork implements Network {
         validationEpoch(trainSetIterator);
     }
 
+    /**
+     * After training epoch validation step
+     * @param valSetIterator
+     */
     private void validationEpoch(Iterator<Vector> valSetIterator){
         int correctPredictions = 0;
         
@@ -275,6 +331,10 @@ public class NeuralNetwork implements Network {
             changeDropoutMode(true); // enable dropout back for training
         }
     } 
+
+    /**
+     * Training function
+     */
     public void train(ArrayList<Vector> trainSet, double trainSetSize, double learningRate, int epochs, int batchSize){
         
         if (trainingHelper == null){
@@ -290,7 +350,7 @@ public class NeuralNetwork implements Network {
         }
 
         if(dropoutMode != null){
-            changeDropoutMode(false); // disable dropout after training
+            changeDropoutMode(false); 
         }
     }
 }

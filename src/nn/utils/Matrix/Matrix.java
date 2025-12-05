@@ -1,7 +1,16 @@
 package nn.utils.Matrix;
 
+/**
+ * Class for util operations with arrays and matrixes
+ */
 public final class Matrix {
     
+    /**
+     * used for neuron potentials
+     * @param inputs the outputs of neurons from the previous layer
+     * @param weights neuron weights
+     * @return neuron potential
+     */
     public static double weightProductAndSum(double[] inputs, double[] weights){
 
         if (inputs.length + 1 != weights.length){
@@ -27,6 +36,13 @@ public final class Matrix {
         }
     }
 
+    /**
+     * 
+     * @param addingTo an out parameter, matrix that is being added to
+     * @param zeroing matrix that is zeroed out
+     * @param batchSize used to divide the sum
+     * @param learningRate
+     */
     public static void addAndZeroOutMatrix(double[][][] addingTo, double[][][] zeroing, int batchSize,double learningRate){
         for(int layer = 1; layer < addingTo.length; layer++){
             for(int neuron = 0; neuron < addingTo[layer].length; neuron++){
@@ -39,6 +55,11 @@ public final class Matrix {
         }
     }
 
+    /**
+     * 
+     * @param vector
+     * @return: index of the max value inside an array
+     */
     public static int maxValueIndex(double[] vector){
         int maxIndex = 0;
         double maxValue = vector[0];

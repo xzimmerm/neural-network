@@ -1,12 +1,16 @@
 package nn.utils.Training;
 
+
 public class AdamTrainingHelper extends TrainingHelper {
 
     double beta1;
     double beta2;
     double momentumMatrix[][][];
     double rmsMatrix[][][];
-
+    
+    /**
+    * SGD training helper upgraded with ADAM
+    */
     public AdamTrainingHelper(double[][][] weights, double[][] outputs, double[][] potentials,  nn.interfaces.ActivationFunction[] activationFunctions, double learningRate, int batchSize, double beta1, double beta2) {
         super(weights, outputs, potentials, activationFunctions, learningRate, batchSize);
 

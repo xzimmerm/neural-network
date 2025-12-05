@@ -3,6 +3,9 @@ package nn.utils.Training;
 import nn.interfaces.ActivationFunction;
 import nn.utils.Matrix.Matrix;
 
+/**
+ * Does SGD on a neural network
+ */
 public class TrainingHelper {
     
     protected double[][][] weights;
@@ -14,6 +17,15 @@ public class TrainingHelper {
     protected double learningRate;
     protected int batchSize;
 
+    /**
+     * 
+     * @param weights
+     * @param outputs
+     * @param potentials
+     * @param activationFunctions
+     * @param learningRate
+     * @param batchSize
+     */
     public TrainingHelper(double[][][] weights, double[][] outputs, double[][] potentials, ActivationFunction[] activationFunctions, double learningRate, int batchSize){
         this.weights = weights;
         this.outputs = outputs;
@@ -39,6 +51,11 @@ public class TrainingHelper {
     }
 
 
+    /**
+     * Backpropagation to compute gradients
+     * @param correctLabel correct label of the vector used for training
+     * @param learningRate
+     */
     public void backpropagate(double correctLabel, double learningRate){
     this.learningRate = learningRate;
 
@@ -48,6 +65,10 @@ public class TrainingHelper {
        
     }
 
+    /**
+     * Computes deltas for all hidden and output neurons
+     * @param correctLabel
+     */
     private void computeDeltas(double correctLabel){
           outputLayerDelta(correctLabel);
         for(int layer = deltas.length - 2; layer > 0; layer--){
@@ -89,6 +110,9 @@ public class TrainingHelper {
         }
     }
     
+    /**
+     * Computes the gradient and adds it to previous ones from the batch
+     */
     private void computeBatchGradient(){
         for(int layer = 1; layer < weights.length; layer++){
             double[] deltasLayer = deltas[layer];
@@ -105,6 +129,9 @@ public class TrainingHelper {
         }
     }
 
+    /**
+     * Adds the computed batch gradients to the weights
+     */
     public void takeAStep(){
         
         Matrix.addAndZeroOutMatrix(weights, batchGradient, batchSize, learningRate);

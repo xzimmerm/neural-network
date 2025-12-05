@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
+/**
+ * Class used to write to files
+ */
 public class FileWriter {
     
     PrintWriter writer; 
@@ -50,6 +53,10 @@ public class FileWriter {
         }
     }
 
+    /**
+     * Writes a label to one line of the file
+     * @param label 
+     */
     public void writeLabel(int label){
         String labelString = Integer.toString(label) + '\n';
         writer.write(labelString);

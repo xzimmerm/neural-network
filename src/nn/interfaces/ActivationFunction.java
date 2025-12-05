@@ -1,5 +1,8 @@
 package nn.interfaces;
 
+/**
+ * 
+ */
 public interface ActivationFunction {
     
     public double activation(double input);
